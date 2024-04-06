@@ -11,3 +11,4 @@ public class AverageFind {
         return sum / arr.length;
     }
 }
+//linear - 0(N)
