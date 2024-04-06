@@ -15,3 +15,4 @@ public class PrimeCheck{
         return isPrime(n,divisor - 1);
     }
 }
+// linear - O(n)

@@ -18,3 +18,4 @@ public class Permutations {
         }
     }
 }
+//factorial - O(n!)

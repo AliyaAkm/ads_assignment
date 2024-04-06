@@ -8,3 +8,4 @@ public class BinomialRec {
         return binomial(n - 1, k - 1) + binomial(n - 1, k);
     }
 }
+// exponential - O(2^n)

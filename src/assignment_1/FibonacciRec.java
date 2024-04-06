@@ -9,3 +9,4 @@ public class FibonacciRec {
         return fibonacci(n - 1) + fibonacci(n - 2);
     }
 }
+// exponential - O(2^n)

@@ -12,3 +12,4 @@ public class allDigit{
         return false;
     }
 }
+// linear - 0(N)

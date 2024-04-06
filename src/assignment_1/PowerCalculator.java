@@ -9,3 +9,4 @@ public class PowerCalculator {
         }
     }
 }
+// linear - O(n)

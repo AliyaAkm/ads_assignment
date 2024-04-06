@@ -9,3 +9,4 @@ public class FindFactorial{
         return n * Factorial(n-1);
     }
 }
+// linear - O(n)

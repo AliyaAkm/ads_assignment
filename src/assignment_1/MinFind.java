@@ -10,3 +10,4 @@ public class MinFind{
         return Math.min(minOfRest,arr[n-1]);
     }
 }
+// linear - 0(N)
