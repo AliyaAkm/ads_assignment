@@ -1,6 +1,7 @@
 package assignment_3;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
+import java.util.Stack;
 
 public class BST<K extends Comparable<K>, V> implements Iterable<BST.Entry<K, V>> {
 
@@ -41,64 +42,96 @@ public class BST<K extends Comparable<K>, V> implements Iterable<BST.Entry<K, V>
     }
 
     public void put(K key, V val) {
-        root = put(root, key, val);
-    }
-
-    private Node put(Node x, K key, V val) {
-        if (x == null) {
+        if (root == null) {
+            root = new Node(key, val);
             size++;
-            return new Node(key, val);
+            return;
         }
-        int cmp = key.compareTo(x.key);
-        if (cmp < 0) x.left = put(x.left, key, val);
-        else if (cmp > 0) x.right = put(x.right, key, val);
-        else x.val = val;
-        return x;
+
+        Node current = root;
+        Node parent = null;
+        while (current != null) {
+            parent = current;
+            int cmp = key.compareTo(current.key);
+            if (cmp < 0)
+                current = current.left;
+            else if (cmp > 0)
+                current = current.right;
+            else {
+                current.val = val;
+                return;
+            }
+        }
+
+        int cmp = key.compareTo(parent.key);
+        if (cmp < 0)
+            parent.left = new Node(key, val);
+        else
+            parent.right = new Node(key, val);
+        size++;
     }
 
     public V get(K key) {
         Node x = root;
         while (x != null) {
             int cmp = key.compareTo(x.key);
-            if (cmp < 0) x = x.left;
-            else if (cmp > 0) x = x.right;
-            else return x.val;
+            if (cmp < 0)
+                x = x.left;
+            else if (cmp > 0)
+                x = x.right;
+            else
+                return x.val;
         }
         return null;
     }
 
     public void delete(K key) {
-        root = delete(root, key);
-    }
+        if (root == null) return;
 
-    private Node delete(Node x, K key) {
-        if (x == null) return null;
-        int cmp = key.compareTo(x.key);
-        if (cmp < 0) x.left = delete(x.left, key);
-        else if (cmp > 0) x.right = delete(x.right, key);
-        else {
-            if (x.right == null) return x.left;
-            if (x.left == null) return x.right;
-            Node t = x;
-            x = min(t.right);
-            x.right = deleteMin(t.right);
-            x.left = t.left;
+        Node parent = null;
+        Node current = root;
+        while (current != null) {
+            int cmp = key.compareTo(current.key);
+            if (cmp == 0) break;
+            parent = current;
+            if (cmp < 0)
+                current = current.left;
+            else
+                current = current.right;
+        }
+
+        if (current == null) return;
+
+        if (current.left == null && current.right == null) {
+            if (parent == null)
+                root = null;
+            else if (parent.left == current)
+                parent.left = null;
+            else
+                parent.right = null;
+        } else if (current.left == null || current.right == null) {
+            Node child = (current.left != null) ? current.left : current.right;
+            if (parent == null)
+                root = child;
+            else if (parent.left == current)
+                parent.left = child;
+            else
+                parent.right = child;
+        } else {
+            Node successorParent = current;
+            Node successor = current.right;
+            while (successor.left != null) {
+                successorParent = successor;
+                successor = successor.left;
+            }
+            current.key = successor.key;
+            current.val = successor.val;
+            if (successorParent.left == successor)
+                successorParent.left = successor.right;
+            else
+                successorParent.right = successor.right;
         }
         size--;
-        return x;
-    }
-
-    private Node min(Node x) {
-        while (x.left != null) {
-            x = x.left;
-        }
-        return x;
-    }
-
-    private Node deleteMin(Node x) {
-        if (x.left == null) return x.right;
-        x.left = deleteMin(x.left);
-        return x;
     }
 
     public Iterator<Entry<K, V>> iterator() {
@@ -106,36 +139,29 @@ public class BST<K extends Comparable<K>, V> implements Iterable<BST.Entry<K, V>
     }
 
     private class BSTIterator implements Iterator<Entry<K, V>> {
-        private Node current;
+        private Stack<Node> stack;
 
         public BSTIterator(Node root) {
-            current = min(root);
+            stack = new Stack<>();
+            while (root != null) {
+                stack.push(root);
+                root = root.left;
+            }
         }
 
         public boolean hasNext() {
-            return current != null;
+            return !stack.isEmpty();
         }
 
         public Entry<K, V> next() {
             if (!hasNext()) throw new NoSuchElementException();
-            Node node = current;
-            current = successor(current);
-            return new Entry<>(node.key, node.val);
-        }
-
-        private Node successor(Node x) {
-            if (x.right != null) return min(x.right);
-            Node succ = null;
-            Node ancestor = root;
-            while (ancestor != x) {
-                if (x.key.compareTo(ancestor.key) < 0) {
-                    succ = ancestor;
-                    ancestor = ancestor.left;
-                } else {
-                    ancestor = ancestor.right;
-                }
+            Node node = stack.pop();
+            Node current = node.right;
+            while (current != null) {
+                stack.push(current);
+                current = current.left;
             }
-            return succ;
+            return new Entry<>(node.key, node.val);
         }
 
         public void remove() {
